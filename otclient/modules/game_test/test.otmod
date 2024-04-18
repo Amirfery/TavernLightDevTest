@@ -1,0 +1,9 @@
+Module
+  name: game_test
+  description: Show the Jump button
+  author: Amir Farahani
+  website:
+  sandboxed: true
+  scripts: [ test ]
+  @onLoad: init()
+  @onUnload: terminate()

@@ -1,0 +1,9 @@
+MainWindow
+  id: testWindow
+  size: 200 200
+  @onEscape: toggle()
+  Button
+    id: startButton
+    !text: tr('Jump!')
+    anchor.right: parent.right
+    width: 64
