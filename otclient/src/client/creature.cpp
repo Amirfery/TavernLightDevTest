@@ -144,7 +144,32 @@ void Creature::internalDrawOutfit(Point dest, float scaleFactor, bool animateWal
                 continue;
 
             auto datType = rawGetThingType();
-            datType->draw(dest, scaleFactor, 0, xPattern, yPattern, zPattern, animationPhase, yPattern == 0 ? lightView : nullptr);
+            //Determine the direction of after images
+            int yDirection = 0;
+            int xDirection = 0;
+            switch (xPattern)
+            {
+            case 0:
+                yDirection = 1;
+                break;
+            case 1:
+                xDirection = -1;
+                break;
+            case 2:
+                yDirection = -1;
+                break;
+            case 3:
+                xDirection = 1;
+                break;
+            default:
+                break;
+            }
+            // Run shader only if we are moving
+            if (useShader && m_shader && m_walking)
+                g_painter->setShaderProgram(m_shader);
+            datType->draw(dest, scaleFactor, 0, xPattern, yPattern, zPattern, animationPhase, yPattern == 0 ? lightView : nullptr, 1.f);
+            if (useShader && m_shader)
+                g_painter->resetShaderProgram();
 
             if(getLayers() > 1) {
                 Color oldColor = g_painter->getColor();
@@ -161,6 +186,29 @@ void Creature::internalDrawOutfit(Point dest, float scaleFactor, bool animateWal
                 g_painter->setColor(oldColor);
                 g_painter->setCompositionMode(oldComposition);
             }
+            // Draw after images if we are walking
+            if (m_walking)
+                for (int i = 1; i < 5; i++)
+                {
+                    auto temp = dest + Point(20 * i * xDirection, 20 * i * yDirection);
+                    datType->draw(temp, scaleFactor, 0, xPattern, yPattern, zPattern, animationPhase, yPattern == 0 ? lightView : nullptr, 1.f - 0.2f * i);
+                    if (getLayers() > 1) {
+                        Color oldColor = g_painter->getColor();
+                        Painter::CompositionMode oldComposition = g_painter->getCompositionMode();
+                        g_painter->setCompositionMode(Painter::CompositionMode_Multiply);
+                        g_painter->setColor(m_outfit.getHeadColor());
+                        datType->draw(temp, scaleFactor, SpriteMaskYellow, xPattern, yPattern, zPattern, animationPhase);
+                        g_painter->setColor(m_outfit.getBodyColor());
+                        datType->draw(temp, scaleFactor, SpriteMaskRed, xPattern, yPattern, zPattern, animationPhase);
+                        g_painter->setColor(m_outfit.getLegsColor());
+                        datType->draw(temp, scaleFactor, SpriteMaskGreen, xPattern, yPattern, zPattern, animationPhase);
+                        g_painter->setColor(m_outfit.getFeetColor());
+                        datType->draw(temp, scaleFactor, SpriteMaskBlue, xPattern, yPattern, zPattern, animationPhase);
+                        g_painter->setColor(oldColor);
+                        g_painter->setCompositionMode(oldComposition);
+                    }
+                }
+
         }
     // outfit is a creature imitating an item or the invisible effect
     } else  {

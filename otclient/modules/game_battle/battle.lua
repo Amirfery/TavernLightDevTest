@@ -18,6 +18,8 @@ hideSkullsButton = nil
 hidePartyButton = nil
 
 function init()
+  -- Create a fragment shader from outline.frag file
+  g_shaders.createFragmentShader('Outline', 'shaders/outline.frag')
   g_ui.importStyle('battlebutton')
   battleButton = modules.client_topmenu.addRightGameToggleButton('battleButton', tr('Battle') .. ' (Ctrl+B)', '/images/topbuttons/battle', toggle)
   battleButton:setOn(true)
@@ -75,7 +77,7 @@ function init()
   })
 
   connect(LocalPlayer, {
-    onPositionChange = onCreaturePositionChange
+    onPositionChange = onCreaturePositionChange,
   })
 
   connect(g_game, {
@@ -290,6 +292,8 @@ end
 
 function onCreaturePositionChange(creature, newPos, oldPos)
   if creature:isLocalPlayer() then
+    -- set outline shader on player when he moves
+    creature:setCreatureShader(g_shaders.getShader('Outline'), true)
     if oldPos and newPos and newPos.z ~= oldPos.z then
       checkCreatures()
     else

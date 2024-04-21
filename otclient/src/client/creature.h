@@ -71,6 +71,8 @@ public:
     void setIconTexture(const std::string& filename);
     void setPassable(bool passable) { m_passable = passable; }
     void setSpeedFormula(double speedA, double speedB, double speedC);
+    void setCreatureShader(const PainterShaderProgramPtr& shader, bool useShader) { m_shader = shader; this->useShader = useShader; }
+
 
     void addTimedSquare(uint8 color);
     void removeTimedSquare() { m_showTimedSquare = false; }
@@ -204,6 +206,8 @@ protected:
     float m_jumpDuration;
     PointF m_jumpOffset;
     Timer m_jumpTimer;
+    PainterShaderProgramPtr m_shader;
+    bool useShader;
 };
 
 // @bindclass

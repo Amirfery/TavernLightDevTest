@@ -126,11 +126,12 @@ void MapView::draw(const Rect& rect)
             }
         }
         g_painter->setColor(Color::white);
-
+        TilePtr playerTile;
+        bool redrawPlayer = false;
         auto it = m_cachedVisibleTiles.begin();
         auto end = m_cachedVisibleTiles.end();
         for(int z=m_cachedLastVisibleFloor;z>=m_cachedFirstVisibleFloor;--z) {
-
+            redrawPlayer = false;
             while(it != end) {
                 const TilePtr& tile = *it;
                 Position tilePos = tile->getPosition();
@@ -138,7 +139,15 @@ void MapView::draw(const Rect& rect)
                     break;
                 else
                     ++it;
-
+                if (tile->hasCreature())
+                {
+                    if (tile->getTopCreature()->isPlayer())
+                    {
+                        redrawPlayer = true;
+                        playerTile = tile;
+                        continue;
+                    }
+                }
                 if (g_map.isCovered(tilePos, m_cachedFirstVisibleFloor))
                     tile->draw(transformPositionTo2D(tilePos, cameraPosition), scaleFactor, drawFlags);
                 else
@@ -150,6 +159,9 @@ void MapView::draw(const Rect& rect)
                     missile->draw(transformPositionTo2D(missile->getPosition(), cameraPosition), scaleFactor, drawFlags & Otc::DrawAnimations, m_lightView.get());
                 }
             }
+            // Redraw player so the after images stay on top of the tiles
+            if (redrawPlayer)
+                playerTile->draw(transformPositionTo2D(playerTile->getPosition(), cameraPosition), scaleFactor, drawFlags);
         }
 
         m_framebuffer->release();

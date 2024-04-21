@@ -371,7 +371,7 @@ void ThingType::unserializeOtml(const OTMLNodePtr& node)
     }
 }
 
-void ThingType::draw(const Point& dest, float scaleFactor, int layer, int xPattern, int yPattern, int zPattern, int animationPhase, LightView *lightView)
+void ThingType::draw(const Point& dest, float scaleFactor, int layer, int xPattern, int yPattern, int zPattern, int animationPhase, LightView *lightView, float opacity)
 {
     if(m_null)
         return;
@@ -400,13 +400,13 @@ void ThingType::draw(const Point& dest, float scaleFactor, int layer, int xPatte
     Rect screenRect(dest + (textureOffset - m_displacement - (m_size.toPoint() - Point(1, 1)) * 32) * scaleFactor,
                     textureRect.size() * scaleFactor);
 
-    bool useOpacity = m_opacity < 1.0f;
+    bool useOpacity = opacity < 1.0f;
 
     if(useOpacity)
-        g_painter->setColor(Color(1.0f,1.0f,1.0f,m_opacity));
-
+        g_painter->setColor(Color(1.0f,1.0f,1.0f,opacity));
+    glDepthFunc(GL_ALWAYS);
     g_painter->drawTexturedRect(screenRect, texture, textureRect);
-
+    glDepthFunc(GL_LESS);
     if(useOpacity)
         g_painter->setColor(Color::white);
 
